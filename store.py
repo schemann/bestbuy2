@@ -27,13 +27,25 @@ class Store:
             raise ValueError("Product is not in the store.")
         self.products.remove(product)
 
+    def __contains__(self, product) -> bool:
+        """Support `product in store`."""
+        return product in self.products
+
+    def __add__(self, other):
+        """Return a new Store with the products of both stores (each product once)."""
+        if not isinstance(other, Store):
+            return NotImplemented
+        combined = list(self.products)
+        combined.extend(product for product in other.products if product not in combined)
+        return Store(combined)
+
     def get_total_quantity(self) -> int:
         """Return the total number of items in the store."""
-        return sum(product.get_quantity() for product in self.products)
+        return sum(product.quantity for product in self.products)
 
     def get_all_products(self) -> List[products.Product]:
         """Return all active products in the store."""
-        return [product for product in self.products if product.is_active()]
+        return [product for product in self.products if product.active]
 
     def order(self, shopping_list: List[Tuple[products.Product, int]]) -> float:
         """Buy every (product, quantity) pair and return the total price.
