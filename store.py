@@ -53,13 +53,7 @@ class Store:
             requested[product] = requested.get(product, 0) + quantity
 
         for product, quantity in requested.items():
-            if not product.is_active():
-                raise ValueError(f"{product.name} is not active and cannot be bought.")
-            if quantity > product.get_quantity():
-                raise ValueError(
-                    f"Only {product.get_quantity()} of {product.name} in stock, "
-                    f"cannot order {quantity}."
-                )
+            product.validate_purchase(quantity)
 
         total_price = 0.0
         for product, quantity in requested.items():
@@ -71,7 +65,7 @@ def main():
     """Exercise the Store class with the example from the assignment."""
     product_list = [products.Product("MacBook Air M2", price=1450, quantity=100),
                     products.Product("Bose QuietComfort Earbuds", price=250, quantity=500),
-                    products.Product("Google Pixel 7", price=500, quantity=250),
+                    products.NonStockedProduct("Windows License", price=125),
                     ]
 
     best_buy = Store(product_list)

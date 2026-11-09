@@ -1,7 +1,7 @@
 """Unit tests for the Product class."""
 import pytest
 
-from products import Product
+from products import LimitedProduct, NonStockedProduct, Product
 
 
 def test_create_normal_product():
@@ -55,3 +55,30 @@ def test_buy_more_than_in_stock_raises():
     with pytest.raises(ValueError):
         product.buy(251)
     assert product.get_quantity() == 250
+
+
+def test_non_stocked_product_has_zero_quantity_and_stays_active():
+    """A non-stocked product starts at 0, stays active and keeps 0 after a purchase."""
+    product = NonStockedProduct("Windows License", price=125)
+    assert product.get_quantity() == 0
+    assert product.is_active()
+    assert product.buy(3) == 375
+    assert product.get_quantity() == 0
+    assert product.is_active()
+
+
+def test_non_stocked_product_refuses_stock():
+    """Setting a quantity on a non-stocked product raises."""
+    product = NonStockedProduct("Windows License", price=125)
+    with pytest.raises(ValueError):
+        product.set_quantity(10)
+
+
+def test_limited_product_refuses_more_than_maximum():
+    """Buying more than the per-order maximum raises and keeps the stock."""
+    product = LimitedProduct("Shipping", price=10, quantity=250, maximum=1)
+    with pytest.raises(ValueError):
+        product.buy(2)
+    assert product.get_quantity() == 250
+    assert product.buy(1) == 10
+    assert product.get_quantity() == 249
